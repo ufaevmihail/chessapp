@@ -1,15 +1,22 @@
-
+//var websocket = require('./GameMain.js').websocket
+import {MultiSizer} from './myTools.js'
+import Cookies from 'js-cookie';
+var websocket=require('./GameMain.js').ws()
+var chatBoard;
 var canvas;
 var ctx;           
 var images = {};
 var image_names = ["wferz.png","wkonb.png","wroof.png","wslon.png","wking.png","wpeshka.png",
-"bferz.png","bkonb.png","broof.png","bslon.png","bking.png","bpeshka.png"];
+"bferz.png","bkonb.png","broof.png","bslon.png","bking.png","bpeshka.png",'strelkab.png','strelkas.png'];
 var canevent = null;
 var fieldwidth = 40;
 var id;
-var websocket;
 var board;
 var game;
+var connected=false;
+export function connect(){
+	connected=true
+}
 /*for (let e of ["mousemove","mousedown","mouseup"]){
 canvas.addEventListener(e, function(event){
 	//if (e=="mouseup"){return;}
@@ -17,11 +24,30 @@ canvas.addEventListener(e, function(event){
 	
 })}*/
 var moveaplier = true;
+var makeMoveFunc=(e,spr)=>{if (spr.canMoveHere()){game.player.selectedfigure.makeMove(spr);game.switchTurn();}
+	else{if (game.player.selectedfigure != null){game.player.selectedfigure.figReturn()}};game.player.selectedfigure=null;
+	if (spr.fillcolor =="green")spr.fillcolor=null;;}
+var adapter = new MultiSizer({'sm':[(e,spr)=>{},makeMoveFunc,()=>true],'xl':[makeMoveFunc,(e,spr)=>{},()=>false]})
+class Flipper{
+	angle_in_rad = 0
+	angle_delta = Math.PI/1000*25
+	flipped = false
+	flip(){
+		this.flipped=true
+		var timer = setInterval(()=>{this.angle_in_rad+=this.angle_delta},25)
+		this.flip_desk()
+		setTimeout(()=>{clearInterval(timer)},1000)
+	}
+	flip_desk(){
+		const container = document.querySelector(".myCanvas");
+		container.classList.toggle("flipping");
+	}
+}
+export var flipper= new Flipper()
 function canvasevent(e){canevent=e}
 
 
-function arrayRemove(arr, value) {
- 
+function arrayRemove(arr, value) { 
    return arr.filter(function(geeks){
        return geeks != value;
    });
@@ -64,6 +90,7 @@ function loadImage(name){
         }
         img.onerror = (err) => {
             reject(err)
+			console.log(img.src)
         }
         img.src = 'images/' +name;
  
@@ -85,7 +112,7 @@ class Sprite{
 	fillcolor=null;
 	handleEvent(e){
 		if (e.type == "mousemove") this.onmousemove.forEach(func=>func(e,this));
-		if (this.mouseintersect == true){
+		if (this.mouseintersect == true || (adapter.actions[2]() && this.mousecollide(e.offsetX,e.offsetY) )){
 			//console.log(e.type);
 			if (e.type == "mousedown"){
 				this.onmousedown.forEach(func=>func(e,this));
@@ -95,6 +122,7 @@ class Sprite{
 				this.onmouseup.forEach(func=>func(e,this));
 				
 			}
+			
 			if (this.mousecollide(e.offsetX,e.offsetY)==false){
 				this.onmouseout.forEach(func=>func(e,this));
 				this.mouseintersect = false;
@@ -120,14 +148,35 @@ class Sprite{
 		ctx.restore()
 	}
 }
+class Arrow extends Sprite{
+	behaviours=[(spr)=>{ctx.save()
+						ctx.globalAlpha=0.7;
+						ctx.translate(fieldwidth*(spr.px+0.5),fieldwidth*(spr.py+0.5))
+						//var angle = Math.atan2(this.height_in_fields,this.width_in_fields)
+						ctx.rotate(spr.angle)
+						ctx.drawImage(spr.img,0,-fieldwidth/2,
+						spr.length,fieldwidth)
+						ctx.restore()
+		}]
+	constructor(startx,starty,endx,endy){
+		super()
+		this.px=startx
+		this.py=starty
+		this.width_in_fields = endx-startx
+		this.abs_width=Math.abs(endx-startx)
+		this.height_in_fields = endy-starty
+		this.abs_height = Math.abs(endy-starty)
+		this.img=this.width_in_fields**2+this.height_in_fields**2 > 20 ? images['strelkab.png'] : images['strelkas.png']
+		this.angle = Math.atan2(this.height_in_fields,this.width_in_fields)
+		this.length = Math.sqrt(this.abs_width**2+this.abs_height**2)*fieldwidth
+	}
+}
 class Field extends Sprite{
 	figure = null;
 	onmouseover=[(e,spr)=>{if (spr.canMoveHere()) spr.fillcolor="green";}]
 	onmouseout =[(e,spr)=>{if (spr.fillcolor =="green")spr.fillcolor=null;}]
-	onmouseup = [(e,spr)=>{if (spr.canMoveHere()){game.player.selectedfigure.makeMove(spr);game.switchTurn();}
-	//game.player.selectedfigure=null; spr.fillcolor=null;}]
-	else{if (game.player.selectedfigure)game.player.selectedfigure.figReturn()};game.player.selectedfigure=null;
-	if (spr.fillcolor =="green")spr.fillcolor=null;;}]
+	onmouseup = [/*(e,spr)=>{if (game.player.selectedfigure)game.player.selectedfigure.timeout=true},*/(e,spr)=>{adapter.actions[0](e,spr)}]
+	onmousedown=[(e,spr)=>{adapter.actions[1](e,spr)}]
 	behaviours = [(spr)=>{ctx.clearRect(spr.px*fieldwidth,spr.py*fieldwidth,fieldwidth,fieldwidth)}]
 	constructor(color,px,py){
 		super();
@@ -139,11 +188,16 @@ class Field extends Sprite{
 		this.width = fieldwidth;
 		this.height = fieldwidth;
 		this.behaviours.push((obj)=>{ctx.fillStyle=obj.startcolor;
-		ctx.fillRect(obj.px*fieldwidth,obj.py*fieldwidth,fieldwidth,fieldwidth);})
+			ctx.fillRect(obj.px*fieldwidth,obj.py*fieldwidth,fieldwidth,fieldwidth);})
 		this.behaviours.push((spr)=>{if (game.player.selectedfigure&&game.player.selectedfigure.cantogofields.includes(this)){
 			ctx.fillStyle = "LawnGreen";
 			ctx.globalAlpha=0.2;
-			ctx.fillRect(spr.px*fieldwidth,spr.py*fieldwidth,fieldwidth,fieldwidth)}})
+			ctx.fillRect(spr.px*fieldwidth,spr.py*fieldwidth,fieldwidth,fieldwidth)}
+			if (game.player.selectedfigure && game.player.selectedfigure.field == this){
+				ctx.fillStyle = "Blue";
+				ctx.globalAlpha=0.5;
+				ctx.fillRect(spr.px*fieldwidth,spr.py*fieldwidth,fieldwidth,fieldwidth)}
+			})
 		this.behaviours.push((spr)=>{if (spr.fillcolor!=null){
 			ctx.fillStyle = spr.fillcolor;
 			ctx.globalAlpha=0.5;
@@ -176,6 +230,7 @@ class Board{
 	figures = []
 	wfigures = []
 	bfigures = []
+	arrow = null
 	kings=[null,null]
 	rooks = [[],[]];
 	sledpeshkifield;
@@ -187,12 +242,14 @@ class Board{
 	["peshka",7,6,1]]
 	flipped=1
 	constructor(){
+		
+		this.figures = [this.wfigures,this.bfigures];
+	}
+	createNewGame(loadeddata=null){
 		var s=[]
 		var wking;
 		var bking;
 		var color = ["white","saddlebrown"];
-		this.figures = [this.wfigures,this.bfigures];
-		//this.kings=[wking,bking]
 		for (let i=0; i<8;i++){
 			for (let j=0; j<8;j++){
 				s.push(new Field(color[(i+j+1)%2],i,j))
@@ -200,7 +257,12 @@ class Board{
 			this.fields.push(s);
 			s=[]
 		}
-		for (let i of this.figparams){
+		var figuress
+		if (!loadeddata)
+			figuress=this.figparams
+		else
+			figuress = loadeddata.figures
+		for (let i of figuress){
 			if (i[0] == "king")
 				var fig = new KingFigure(i[0],this.fields[i[1]][i[2]],game.players[i[3]])				
 			else if (i[0] =="peshka")
@@ -214,11 +276,26 @@ class Board{
 			if (i[0]=="king"){
 				this.kings[i[3]] = fig;
 			}
+			if (loadeddata){
+				if (!i[5])
+					fig.firstmove=false
+					//game.turn=i[6]-1
+			}
 		}
+		if (loadeddata){
+			loadeddata.sledi.forEach(sledAr=>{board.fields[sledAr[0]][sledAr[1]].sledpeshki=board.fields[sledAr[2]][sledAr[3]].figure			
+			})
+			game.turn=loadeddata.turn-1
+			game.switchTurn()
+			if (game.turn % 2 === game.player.team)
+				board.arrow = new Arrow(...loadeddata.lastmove)
+		}
+		//board.fields[this.px][(this.py+field.py)/2].sledpeshki = this;
 	}
-	redraw(){
+	redraw(){		
 		this.fields.forEach(str=>str.forEach(el=>el.update()));
 		this.figures.forEach(str=>str.forEach(el=>el.update()));
+		this.arrow?.update()
 		if (game.player.selectedfigure)
 			game.player.selectedfigure.update();
 	}
@@ -234,16 +311,23 @@ class Board{
 	}
 	updateFigPos(){
 		this.figures.forEach(str=>str.forEach(el=>{el.posx=el.px*fieldwidth;el.posy=el.py*fieldwidth}));
+		this.fields.forEach(str=>str.forEach(el=>{el.posx=el.px*fieldwidth;el.posy=el.py*fieldwidth}));
 	}
 }
 
 
 class Figure extends Sprite{
-	onmousedown=[(e,spr)=>{if (spr.player.selectedfigure == null && game.player.team==spr.team && game.turn%2==game.player.team)
-	{spr.setSelected();spr.posx= e.offsetX-spr.width/3;spr.posy = e.offsetY-spr.width/3}}]
-	onmouseup=[]
+	onmousedown=[(e,spr)=>{if (connected && spr.player.selectedfigure == null && game.player.team==spr.team && game.turn%2==game.player.team && !spr.timeout)
+	{spr.setSelected();spr.posx= e.offsetX-spr.width/3;spr.posy = e.offsetY-spr.width/3;spr.timeout=true}}]
+	onmouseup=[(e,spr)=>{}]
 	onmousemove = [(e,spr)=>{if (spr.selected) {spr.posx= e.offsetX-spr.width/3;spr.posy = e.offsetY-spr.width/3}}]
-	behaviours=[(spr)=>{ctx.drawImage(spr.img,spr.posx,spr.posy,fieldwidth,fieldwidth)}]
+	behaviours=[(spr)=>{ctx.save()
+						ctx.translate(spr.posx+fieldwidth/2,spr.posy+fieldwidth/2)
+						ctx.rotate(flipper.angle_in_rad)
+						ctx.drawImage(spr.img,-fieldwidth/2,-fieldwidth/2,fieldwidth,fieldwidth)
+						ctx.restore()
+		//ctx.drawImage(spr.img,spr.posx,spr.posy,fieldwidth,fieldwidth)
+		}]
 	constructor(path,field,player){
 		super();
 		var teams = ["w","b"]
@@ -263,20 +347,23 @@ class Figure extends Sprite{
 		this.selected = false;
 		this.cantogofields = [];
 		this.firstmove = true;
+		this.timeout=false;
 	}
 	setSelected(){
 		this.turnrule();
 		this.enemyFiguresCantAttackOurKing();
 		this.player.selectedfigure=this;
 		this.selected = true;
-
 	}
+	/*update(){
+		super.update()
+		this.timeout=false
+	}*/
 	canMoveHere(field){
 		if (this.cantogofields.includes(field)){
 			return true;
 		}
-		else 
-		{
+		else {
 			return false;
 		}
 		}
@@ -297,21 +384,27 @@ class Figure extends Sprite{
 		this.field = field;
 		this.selected = false;
 		this.firstmove = false;
+		this.timeout=false;
 		this.cantogofields.length = 0;
 		//console.log(this.field);
 		if (send){
 		    websocket.send(JSON.stringify({type:'move',startfield:[isFlipped(predpx),isFlipped(predpy)],
 		    endfield:[isFlipped(this.px),isFlipped(this.py)],
 		    user_id:id,swt:switcht}))
+			board.arrow=null
 		    return send
 		}
 	}
-	figReturn(){
+	figReturn(){		
+		//console.log('отпустили',this.timeout)
+		//this.timeout=false;
 		this.posx = this.px*fieldwidth;
 		this.posy = this.py*fieldwidth;
 		this.selected = false;
 		this.player.selectedfigure=null;
 		this.cantogofields.length = 0;
+		setTimeout(()=>this.timeout=false,10)
+		//this.timeout=false
 		//game.player.selectedfigure=null;
 	}
 	enemyFiguresCantAttackOurKing(){
@@ -325,11 +418,14 @@ class Figure extends Sprite{
 				if (this.name == "king"){
 					if (figure.cantogofields.includes(fld)){
 						removeItemOnce(this.cantogofields,fld);
+						//break;
 					}
 				}
 				if (figure.cantogofields.includes(board.kings[this.team].field)){
-					if (fld != figure.field && this.name != "king")
+					if (fld != figure.field && this.name != "king"){
 						removeItemOnce(this.cantogofields,fld);
+						//break;
+					}
 					figure.cantogofields=[];
 				}
 				figure.cantogofields=[]	
@@ -381,6 +477,7 @@ class KingFigure extends Figure{
         super.makeMove(field,send)
 		this.rokeratewith=[]
 	//	game.switchTurn()
+		console.log(this.field)
 	}
 	rokeratemove(field,send=true){
 	    var rook;
@@ -429,16 +526,45 @@ class Game{
 		}*/
         if (this.curplayerkingfield)
             this.curplayerkingfield.fillcolor = null
+		var checkmat=false
 		for (var figure of board.figures[this.turn%2]){
 			figure.turnrule()
 			if (figure.cantogofields.includes(board.kings[(this.turn+1)%2].field)){
 				board.kings[(this.turn+1)%2].field.fillcolor = "red";
+				checkmat=true
 				this.curplayerkingfield = board.kings[(this.turn+1)%2].field
+				//
 			}
 		}
+		this.checkMattOrDraw(checkmat)
 		this.turn = this.turn + 1;
 		//this.player = this.players[this.turn%2];
 		board.figures.forEach(str=>str.forEach(el=>el.cantogofields=[]));
+	}
+	checkMattOrDraw(checkmat){
+		/*for (var figure of board.figures[this.turn%2]){
+			if (figure.cantogofields.includes(board.kings[(this.turn+1)%2].field))
+		}*/
+		var draw = true
+		var matt=checkmat
+		//var ctgflist=[]
+		//console.log(checkmat)
+		for (var figure of board.figures[(this.turn+1)%2]){
+			figure.turnrule()
+			figure.enemyFiguresCantAttackOurKing()
+			if (figure.cantogofields.length!=0){
+				matt=false
+				draw=false
+				break;
+			}
+		}
+		
+		if (draw && !matt)
+			setTimeout(()=>alert('draw'),100)
+		if (matt){
+			var k = this.turn % 2 ? 'черн' : 'бел'
+			setTimeout(()=>alert(`${k}ые выиграли`),100)
+		}
 	}
 }
 function ferzrule(){
@@ -470,6 +596,10 @@ function konbrule(){
 					if (field.figure.team != this.team)
 						this.cantogofields.push(field)
 		}
+	/*for (var str of board.fields)
+		for (var field of str)
+			this.cantogofields.push(field)*/
+	//this.cantogofields.push(board.fields[0][0])
 };
 function roofrule(){
 	rooff(this);
@@ -599,7 +729,6 @@ function sleep(ms) {
 }
 async function canvasupdate(){
 	//board = new Board();
-	
 	board.redraw();
 	while (true) {if(canevent != null)//sprit.handleEvent(canevent)};
 	//sprit.update();
@@ -613,18 +742,26 @@ function newGame(){
     websocket.send(JSON.stringify({type:"connection",content:"newgame"}))
 }
 function cansize(){
+	game?.player.selectedfigure?.figReturn()
+	if (game && game.player.selectedfigure)
+		game.player.selectedfigure.timeout=false
 	var candiv = document.getElementById("canvasdiv")
-	var canwidth=parseFloat(getComputedStyle(candiv).width)*0.8
+	//var canwidth=Math.max(240,Math.min(parseFloat(getComputedStyle(candiv).width)*0.8,480))
+	//var canwidth=Math.min(parseFloat(getComputedStyle(candiv).width)*0.8,480)
+	var canwidth=parseFloat(getComputedStyle(candiv).width)*0.9
+	
 	canvas.width=canwidth;
 	canvas.height=canwidth;
 	fieldwidth=canwidth/8;
-	
+	//adapter.onSizeChanged()
+	adapter.onSizeChanged()
 }
-
+var on_ws_message;
 window.addEventListener("DOMContentLoaded", async () => {
+	//chatBoard = require('./GameMain.js').chatBoard
+	on_ws_message = require('./GameMain.js').on_ws_message
 	canvas = document.getElementById("myCanvas")
-	cansize()	
-	console.log(canvas.height);
+	cansize()
     ctx = canvas.getContext("2d");
 	canvas.addEventListener("mouseup", async function(event){
 	canvasevent(event);
@@ -642,10 +779,10 @@ canvas.addEventListener("mousemove", function(event){
         canvasevent(event)
 })
 canvas.addEventListener("mouseout", function(event){
-	var sf = game.player.selectedfigure;
-	if (sf != null)
-		sf.figReturn();
-})
+				var sf = game.player.selectedfigure;
+				if (sf != null)
+					sf.figReturn();
+		})
     var preloads = await Promise.all(
         image_names.map(
             imageName => loadImage(imageName)
@@ -656,46 +793,85 @@ canvas.addEventListener("mouseout", function(event){
                 // если загрузка картинки не удалась - можно вернуть дефолтную
                 return null;
             })
-    )).then( imageEntries => {
+    )).then( async imageEntries => {
         // тут мы работаем с загружеными картинками
-
+		
         images = Object.fromEntries(imageEntries);
-        game = new Game();
-        board = new Board()
-        canvasupdate()
-		window.addEventListener('resize',()=>{cansize();board.redraw();board.updateFigPos()});
+		/*while (!connected){
+			console.log(connected)
+			if (connected){
+				game = new Game();
+				board = new Board()
+				canvasupdate()
+			}
+			else
+				sleep(25)
+		}		*/
+		//await sleep(400)
+		game = new Game();
+		board = new Board()
+		//canvasupdate()
+		//window.addEventListener('resize',()=>{cansize();board.updateFigPos()});
     });
- // websocket = new WebSocket("ws://localhost:8001/");
-  websocket = new WebSocket("wss://chessproject1.herokuapp.com/")
-  websocket.onopen=(event)=>{
-  websocket.send(JSON.stringify({type:'connection',content:'startgame'}))}
-
+  //websocket = new WebSocket("ws://localhost:8000/ws/livegame/"+1)
+	
+	
+	websocket.onopen=(event)=>{
+  websocket.send(JSON.stringify({type:'connection',content:'startgame',token: Cookies.get('token')}))}
   websocket.onmessage = ({ data }) => {
     const event = JSON.parse(data);
-    //console.log(event)
     if (event.type=="startgame"){
-        id = event.user_id
-        if (event.content=="ok"){
-            game.player = game.players[id]
-            if (id==0)
-                board.flip()
+        id = event.data.team
+		
+		if (id !== undefined)
+			game.player = game.players[id]
+		else
+			game.player=new Viewer()
+		board.createNewGame()           
+		canvasupdate()
+		window.addEventListener('resize',()=>{cansize();board.updateFigPos()});
+        if (event.content=="ok"){			
+            if (id==0){
+				flipper.flip()
+			}
         }
-        else
-            game.player = new Viewer();
+		//connected = true;
+    }
+	if (event.type=="loadgame"){
+        id = event.data.team
+		
+		if (id !== undefined)
+			game.player = game.players[id]
+		else
+			game.player=new Viewer()
+		board.createNewGame(event.data.figs)           
+		canvasupdate()
+		window.addEventListener('resize',()=>{cansize();board.updateFigPos()});
+        if (event.content=="ok"){			
+            if (id==0)
+                flipper.flip()
+        }
+		connected = true;
     }
     if (event.type=="move_done"){
-        //console.log(game.turn)
-        let startposx = isFlipped(event.startfield[0])
-        let startposy = isFlipped(event.startfield[1])
-        let endposx = isFlipped(event.endfield[0])
-        let endposy = isFlipped(event.endfield[1])
+        let startposx = isFlipped(event.data.startfield[0])
+        let startposy = isFlipped(event.data.startfield[1])
+        let endposx = isFlipped(event.data.endfield[0])
+        let endposy = isFlipped(event.data.endfield[1])
         board.fields[startposx][startposy].figure.makeMove(board.fields[endposx][endposy],false)
-        if (event.swt)
+		board.arrow=new Arrow(startposx,startposy,endposx,endposy)
+        if (event.data.swt)
             game.switchTurn()
     }
-  };})
+	if (event.type == "reload_page")
+		window.location.reload();
+	on_ws_message(event)
+  };
+  })
 
-function getWebSocketServer() {
+
+
+/*function getWebSocketServer() {
   if (window.location.host === "ufaevmihail.github.io") {
     return "wss://chessproject1.herokuapp.com/";
   } else if (window.location.host === "localhost:63342") {
@@ -704,6 +880,4 @@ function getWebSocketServer() {
   } else {
     throw new Error(`Unsupported host: ${window.location.host}`);
   }
-}
-
- 
+}*/

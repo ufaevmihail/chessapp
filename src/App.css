@@ -57,11 +57,11 @@
 	height: 350px;
 	border-radius: 15px;
 }
-.chat-box{
+/*.chat-box{
 	width: 200px;
 	border: 2px solid rgba(115, 77, 38, .6);
 	border-radius: 15px;
-}
+}*/
 .mess {
   width: 100%;
   max-width: 550px;
@@ -79,14 +79,56 @@
    inset 0px 3px 6px #ac7339,
    inset 0px 4px 7px #996633;
 }
+.myCanvas{
+	transition: transform 1.2s;
+}
+.flipping{
+	transform: rotate(180deg);
+}
+.boxShadow11 {
+  width: 80%;
+  max-width: 550px;
+  margin: 1em auto;
+  padding: 1em;
+  box-shadow: 0 3px 3px #575555 inset; 
+}
 .btn-flat {
-      background-color: SaddleBrown;
+      background-color: rgba(160,82,45,.75);
       color: white;
     }
 .btn-flat:hover{
-	background-color: NavajoWhite;
-	color: black;
+	background-color: rgba(139,69,19,.55);
+	color: white;
+}
+.btn-flat:focus{
+	box-shadow:	none
+}
+/*	word-break: break-all;*/
+.chat-box{
+	width: 200px;
+	border: 2px solid rgba(115, 77, 38, .45);
+	border-radius: 15px;
+	background: #FFEBCD radial-gradient(circle at 50% 0, rgba(255,255,255,.85),
+rgba(255,255,255,.55));
+	box-shadow: 0 3px 5px 1px rgba(139,69,19,.4) inset;}
+.alert{
+
+	display: inline-block;
+	padding: 8px;
+}
+.base-error{
+	
 }
 #canvasdiv{
 	width:100%
+}
+.base-form{
+	box-shadow: none;
+	border-color: rgba(115, 77, 38, .4);
+}
+.form-control:focus{
+	border-color: SaddleBrown;
+}
+.form-control:active{
+	border-color: NavajoWhite;
 }
