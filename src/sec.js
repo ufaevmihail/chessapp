@@ -70,7 +70,7 @@ export class UserInfoView{
 			token = token.token
 			this.payload = JSON.parse(atob(token.split('.')[1]));
 			this.token = token;			
-			Cookies.set('token',token,{secure:true,expires: 7})
+			Cookies.set('token',token,{expires: 7})
 			this.create()
 			this.emit('login')
 		}
