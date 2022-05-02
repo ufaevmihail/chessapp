@@ -38,7 +38,8 @@ class HostGameButton extends ErrorButton{
 	}
 	onClick(){
 		this.hostRequest = new JWTRequiredRequest(userInfoView)
-		this.hostRequest.sendReq('create_game/free/',{}).then((data)=>window.location='http://localhost:3000/livegame/'+data.game_id)
+		this.hostRequest.sendReq('create_game/free/',{}).then((data)=>{window.location='http://'+document.location.host+'/livegame/'+data.game_id})
+		
 		
 	}
 	getValue(){
