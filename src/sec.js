@@ -1,4 +1,4 @@
-import React,{useEffect,useReducer} from 'react';
+﻿import React,{useEffect,useReducer} from 'react';
 import Cookies from 'js-cookie';
 export const backDomen = "https://chess-server-app.herokuapp.com/"
 export const backDomenWSS="ws://chess-server-app.herokuapp.com/ws/"

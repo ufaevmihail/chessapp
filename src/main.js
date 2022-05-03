@@ -816,7 +816,7 @@ canvas.addEventListener("mouseout", function(event){
   //websocket = new WebSocket("ws://localhost:8000/ws/livegame/"+1)
 	
 	
-	websocket.onopen=(event)=>{
+	websocket.onopen=(event)=>{ console.log('start game')
   websocket.send(JSON.stringify({type:'connection',content:'startgame',token: Cookies.get('token')}))}
   websocket.onmessage = ({ data }) => {
     const event = JSON.parse(data);
