@@ -1,9 +1,9 @@
 import React,{useEffect,useReducer} from 'react';
 import Cookies from 'js-cookie';
-//export const backDomen = "https://chess-server-app.herokuapp.com/"
-//export const backDomenWSS="ws://chess-server-app.herokuapp.com/ws/"
-export const backDomen = "http://127.0.0.1:8000/"
-export const backDomenWSS="ws://localhost:8000/ws/"
+export const backDomen = "https://chess-server-app.herokuapp.com/"
+export const backDomenWSS="ws://chess-server-app.herokuapp.com/ws/"
+//export const backDomen = "http://127.0.0.1:8000/"
+//export const backDomenWSS="ws://localhost:8000/ws/"
 export const frontDomen = "http://localhost:3000/"
 var csrftoken=Cookies.get('csrftoken');;
 if (!csrftoken)
