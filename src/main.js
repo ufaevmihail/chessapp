@@ -820,8 +820,10 @@ canvas.addEventListener("mouseout", function(event){
  // websocket.send(JSON.stringify({type:'connection',content:'startgame',token: Cookies.get('token')}))}
   websocket.onmessage = ({ data }) => {
     const event = JSON.parse(data);
-	if (event.type=='on_open')
+	if (event.type=='on_open'){
 		websocket.send(JSON.stringify({type:'connection',content:'startgame',token: Cookies.get('token')}))
+		console.log('ffff')
+	}
     if (event.type=="startgame"){
         id = event.data.team
 		
