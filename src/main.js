@@ -422,6 +422,7 @@ class Figure extends Sprite{
 					}
 				}
 				if (figure.cantogofields.includes(board.kings[this.team].field)){
+					board.kings[this.team].rokerate=false
 					if (fld != figure.field && this.name != "king"){
 						removeItemOnce(this.cantogofields,fld);
 						//break;
@@ -470,6 +471,7 @@ class KingFigure extends Figure{
 	constructor(path,field,player){
 		super(path,field,player)
 		this.rokeratewith=[]
+		this.rokerate=true
 	}
 	makeMove(field,send=true){
 		if (Math.abs(this.px-field.px) == 2)
@@ -477,7 +479,7 @@ class KingFigure extends Figure{
         super.makeMove(field,send)
 		this.rokeratewith=[]
 	//	game.switchTurn()
-		console.log(this.field)
+	//	console.log(this.field)
 	}
 	rokeratemove(field,send=true){
 	    var rook;
@@ -539,6 +541,7 @@ class Game{
 		this.checkMattOrDraw(checkmat)
 		this.turn = this.turn + 1;
 		//this.player = this.players[this.turn%2];
+		board.kings.forEach(king=>king.rokerate=true);
 		board.figures.forEach(str=>str.forEach(el=>el.cantogofields=[]));
 	}
 	checkMattOrDraw(checkmat){
@@ -686,7 +689,7 @@ function rooff(obj){
 	}	
 }
 function rokerate(king){
-	if (king.firstmove)
+	if (king.firstmove && board.kings[(king.team+1)%2].rokerate)
 		for (var rook of board.rooks[king.team])
 			if (rook.firstmove)
 				if (noFiguresBetween(king,rook)){
@@ -707,8 +710,9 @@ function rokerateNotUnderAttack(king,rook){
 			fig.turnrule()
 			for (let i=t;i<=k;i++){
 				var fld = board.fields[i][king.py];
-				if (fig.cantogofields.includes(fld))
+				if (fig.cantogofields.includes(fld)){
 					return false;
+				}
 			}
 		}
 	}
