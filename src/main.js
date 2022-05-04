@@ -31,12 +31,23 @@ var adapter = new MultiSizer({'sm':[(e,spr)=>{},makeMoveFunc,()=>true],'xl':[mak
 class Flipper{
 	angle_in_rad = 0
 	angle_delta = Math.PI/1000*25
+	delta=0
 	flipped = false
 	flip(){
-		this.flipped=true
-		var timer = setInterval(()=>{this.angle_in_rad+=this.angle_delta},25)
+		this.flipped=this.flipped == false ? true : false
+		var k=0;
+		var timer = setInterval(()=>{
+		if (this.flipped)
+			this.angle_in_rad+=this.angle_delta;
+		else
+			this.angle_in_rad-=this.angle_delta;
+		k+=1
+		if (k==40)
+			clearInterval(timer)
+		},25)
+		
 		this.flip_desk()
-		setTimeout(()=>{clearInterval(timer)},1000)
+		//setTimeout(()=>{clearInterval(timer)},1000)
 	}
 	flip_desk(){
 		const container = document.querySelector(".myCanvas");
