@@ -780,14 +780,12 @@ window.addEventListener("DOMContentLoaded", async () => {
 	cansize()
     ctx = canvas.getContext("2d");
 	canvas.addEventListener("mouseup", async function(event){
-	alert(event.type)
 	canvasevent(event);
 	moveaplier=false;
 	await sleep(25);
 	moveaplier=true;
 })
 canvas.addEventListener("touchend", async function(event){
-	alert(event.type)
 	canvasevent(event);
 	moveaplier=false;
 	await sleep(25);
