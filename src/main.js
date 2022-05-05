@@ -27,7 +27,7 @@ var moveaplier = true;
 var makeMoveFunc=(e,spr)=>{if (spr.canMoveHere()){game.player.selectedfigure.makeMove(spr);game.switchTurn();}
 	else{if (game.player.selectedfigure != null){game.player.selectedfigure.figReturn()}};game.player.selectedfigure=null;
 	if (spr.fillcolor =="green")spr.fillcolor=null;;}
-var adapter = new MultiSizer({'sm':[(e,spr)=>{},makeMoveFunc,()=>true],'xl':[makeMoveFunc,(e,spr)=>{},()=>false]})
+var adapter = new MultiSizer({'sm':[(e,spr)=>{},makeMoveFunc,(spr,e)=>spr.mousecollide(e.offsetX,e.offsetY)],'xl':[makeMoveFunc,(e,spr)=>{},(spr,e)=>false]})
 class Flipper{
 	angle_in_rad = 0
 	angle_delta = Math.PI/1000*25
@@ -121,9 +121,10 @@ class Sprite{
 	posy;
 	mouseintersect=false;
 	fillcolor=null;
+	interfunc=(spr,e)=>{adapter.actions[2](spr,e)}
 	handleEvent(e){
 		if (e.type == "mousemove") this.onmousemove.forEach(func=>func(e,this));
-		if (this.mouseintersect == true || (adapter.actions[2]() && this.mousecollide(e.offsetX,e.offsetY) )){
+		if (this.mouseintersect == true || this.interfunc(this,e)){
 			//console.log(e.type);
 			if (e.type == "mousedown"){
 				this.onmousedown.forEach(func=>func(e,this));
