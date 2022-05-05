@@ -126,11 +126,11 @@ class Sprite{
 		if (e.type == "mousemove") this.onmousemove.forEach(func=>func(e,this));
 		if (this.mouseintersect == true || this.interfunc(this,e)){
 			//console.log(e.type);
-			if (e.type == "mousedown"){
+			if (e.type == "mousedown" || e.type=='touchstart'){
 				this.onmousedown.forEach(func=>func(e,this));
 				
 			}
-			if (e.type == "mouseup"){
+			if (e.type == "mouseup" || e.type=='touchend'){
 				this.onmouseup.forEach(func=>func(e,this));
 				
 			}
