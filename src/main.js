@@ -299,7 +299,7 @@ class Board{
 			})
 			game.turn=loadeddata.turn-1
 			game.switchTurn()
-			if (game.turn % 2 === game.player.team)
+			if (game.turn % 2 === game.player.team || game.player.team===null)
 				board.arrow = new Arrow(...loadeddata.lastmove)
 		}
 		//board.fields[this.px][(this.py+field.py)/2].sledpeshki = this;
