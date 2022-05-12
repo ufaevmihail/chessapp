@@ -1,6 +1,6 @@
 import {Dispatcher} from './myTools.js'
 import React,{Component} from 'react';
-import { Button } from 'react-bootstrap';
+import { Button,Toast } from 'react-bootstrap';
 import {userInfoView, UserPanel,ErrorButton} from './myComps.js'
 import {JWTRequiredRequest,UserInfoView,backDomenWSS} from './sec.js'
 
@@ -68,25 +68,25 @@ class GamesListComp extends Component{
 		}
 	}
 	render(){
-		return (<div>
-			<h3> Ожидание игроков </h3>
+		return (<Toast className='border-0' style={{width:'300px', backgroundColor:'rgba(255, 222, 173,.5)'}}>
+				<Toast.Body>
+			<h6> Ожидание игроков </h6>
 			{this.state.games.notstarted.map((gameEnt,idx)=>{console.log(gameEnt[1])
 				return <Button key = {idx}
 						variant="flat"
 						onClick={()=>window.location='http://'+document.location.host+'/livegame/'+gameEnt[0]}>
 							белые : {Object.keys(gameEnt[1][0]).length !== 0 ? gameEnt[1][0]['username'] : 'никого'}  черные : {Object.keys(gameEnt[1][1]).length !== 0 ? gameEnt[1][1]['username'] : 'никого'} 
 				</Button>})}
-			<h3> Начавшийся игры </h3>
+			<h6> Начавшиеся игры </h6>
 			{this.state.games.started.map((gameEnt,idx)=>{
 				return <Button key = {idx}
 						variant="flat"
 						onClick={()=>window.location='http://'+document.location.host+'/livegame/'+gameEnt[0]}>
 							белые : {Object.keys(gameEnt[1][0]).length !== 0 ? gameEnt[1][0]['username'] : 'никого'}  черные : {Object.keys(gameEnt[1][1]).length !== 0 ? gameEnt[1][1]['username'] : 'никого'}
-			</Button>}
-			
-			
+			</Button>}			
 			)}
-		</div>)
+		</Toast.Body>
+		</Toast>)
 	}
 }
 export const MainMenu=()=>{
