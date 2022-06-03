@@ -58,7 +58,6 @@ export const GameMain = () => {
 	const params = useParams();
 	if(Object.keys(params).length>1 || !/\d+/.test(params.id))
 		return <Navigate to={'/error404'} />
-	
 	/*req.sendReq("join_game/"+params.id,{}).then(data=>{
 		console.log(data);
 	})*/
@@ -95,11 +94,10 @@ export const GameMain = () => {
 				<UserPanel />
 		</Col>
 	  </Row>
+
 	</Container>
 	
 )};
-
-
 var userid=0;
 var user = "какой то юзер";
 class MesWrapperComp extends Component{
@@ -121,6 +119,7 @@ class MesWrapperComp extends Component{
 		this.message = this.props.msg;
 		this.state={up:	this.props.up}
 		this.ref=React.createRef();
+		//console.log(this.constructor.name)
 		//this.randheight = String(parseInt(Math.random()*100+25))+'px';
 	}
 	componentDidMount(){
@@ -128,6 +127,8 @@ class MesWrapperComp extends Component{
 			setTimeout(()=>{		
 				//wrapper.classList.add('mes-standed');},30);
 		//console.log(getComputedStyle(this.ref.current).height)
+		//this.ref.current.addEventListener('click',()=>{console.log('ff')})
+		//console.log(typeof(this.ref.current))
 		this.scrollBoard();
 		this.setState({up:false})},30)
 	}
@@ -171,6 +172,7 @@ class ChatBoard extends Component{
 	}
 	 componentDidMount() {
 		 this.didMount=true;
+		 //console.log(this.wrapperRef.current.offsetHeight)
 		 //document.addEventListener('click',()=>{if (this.didMount){
 		 //this.addMessage({id:userid,sender: 'какой-то юзер', msg: 'какое-то сообщение'});userid+=1;		 
 		 //}});
@@ -330,5 +332,37 @@ class PlayerComp extends Component{
 
 
 }
+/*const Card = ({ children }) => {
+    let subComponentList = Object.keys(Card);
 
+    let subComponents = subComponentList.map((key) => {
+        return React.Children.map(children, (child) =>
+            child.type.name === key ? child : null
+        );
+    });
 
+    return (
+        <>
+            <div className='card'>
+                {subComponents.map((component) => component)}
+            </div>
+        </>
+    );
+};
+
+const Header = (props) => <div className='card-header'>{props.children}</div>;
+Card.Header = Header;
+
+const Body = (props) => <div className='card-body'>{props.children}</div>;
+Card.Body = Body;
+
+const Footer = (props) => <div className='card-footer'>{props.children}</div>;
+Card.Footer = Footer;
+
+export default Card;
+
+*/
+/*	  <Card>
+  <Card.Header>header</Card.Header>
+  <Card.Body>body</Card.Body>
+</Card>*/

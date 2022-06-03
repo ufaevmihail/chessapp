@@ -71,7 +71,7 @@ class GamesListComp extends Component{
 		return (<Toast className='border-0' style={{width:'300px', backgroundColor:'rgba(255, 222, 173,.5)'}}>
 				<Toast.Body>
 			<h6> Ожидание игроков </h6>
-			{this.state.games.notstarted.map((gameEnt,idx)=>{console.log(gameEnt[1])
+			{this.state.games.notstarted.map((gameEnt,idx)=>{
 				return <Button key = {idx}
 						variant="flat"
 						onClick={()=>window.location='http://'+document.location.host+'/livegame/'+gameEnt[0]}>

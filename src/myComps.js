@@ -360,7 +360,6 @@ class LoginForm extends FormContainer{
 				[],'Пароль','Введите пароль','password')]
 	constructor(props){
 		super(props)
-		
 		this.viewList.forEach(formView=>{formView.onTextChanged=(e)=>{if (this.error){this.error=false; this.forceUpdate()}}})
 	}
 	getHeader(){

@@ -4,6 +4,7 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
+  Switch,
   Link,
   Outlet,
   Navigate

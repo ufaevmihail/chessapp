@@ -27,7 +27,7 @@ var moveaplier = true;
 var makeMoveFunc=(e,spr)=>{if (spr.canMoveHere()){game.player.selectedfigure.makeMove(spr);game.switchTurn();}
 	else{if (game.player.selectedfigure != null){game.player.selectedfigure.figReturn()}};game.player.selectedfigure=null;
 	if (spr.fillcolor =="green")spr.fillcolor=null;;}
-var adapter = new MultiSizer({'sm':[(e,spr)=>{},makeMoveFunc,(spr,e)=>spr.mousecollide(e.offsetX,e.offsetY)],'xl':[makeMoveFunc,(e,spr)=>{},(spr,e)=>false]})
+var adapter = new MultiSizer({'sm':[(e,spr)=>{},makeMoveFunc,(spr,e)=>spr.mousecollide(e.offsetX,e.offsetY),(e,spr)=>{}],'xl':[makeMoveFunc,(e,spr)=>{},(spr,e)=>false,(e,spr)=>{spr.posx= e.offsetX-spr.width/3;spr.posy = e.offsetY-spr.width/3}]})
 class Flipper{
 	angle_in_rad = 0
 	angle_delta = Math.PI/1000*25
@@ -322,8 +322,8 @@ class Board{
         this.flipped = this.flipped*-1;
 	}
 	updateFigPos(){
-		this.figures.forEach(str=>str.forEach(el=>{el.posx=el.px*fieldwidth;el.posy=el.py*fieldwidth}));
-		this.fields.forEach(str=>str.forEach(el=>{el.posx=el.px*fieldwidth;el.posy=el.py*fieldwidth}));
+		this.figures.forEach(str=>str.forEach(el=>{el.posx=el.px*fieldwidth;el.posy=el.py*fieldwidth;el.width=fieldwidth;el.height=fieldwidth}));
+		this.fields.forEach(str=>str.forEach(el=>{el.posx=el.px*fieldwidth;el.posy=el.py*fieldwidth;el.width=fieldwidth;el.height=fieldwidth}));
 	}
 }
 
@@ -332,7 +332,7 @@ class Figure extends Sprite{
 	onmousedown=[(e,spr)=>{if (connected && spr.player.selectedfigure == null && game.player.team==spr.team && game.turn%2==game.player.team && !spr.timeout)
 	{spr.setSelected();spr.posx= e.offsetX-spr.width/3;spr.posy = e.offsetY-spr.width/3;spr.timeout=true}}]
 	onmouseup=[(e,spr)=>{}]
-	onmousemove = [(e,spr)=>{if (spr.selected) {spr.posx= e.offsetX-spr.width/3;spr.posy = e.offsetY-spr.width/3}}]
+	onmousemove = [(e,spr)=>{if (spr.selected) {adapter.actions[3](e,spr)}}]  //spr.posx= e.offsetX-spr.width/3;spr.posy = e.offsetY-spr.width/3
 	behaviours=[(spr)=>{ctx.save()
 						ctx.translate(spr.posx+fieldwidth/2,spr.posy+fieldwidth/2)
 						ctx.rotate(flipper.angle_in_rad)
@@ -366,6 +366,8 @@ class Figure extends Sprite{
 		this.enemyFiguresCantAttackOurKing();
 		this.player.selectedfigure=this;
 		this.selected = true;
+		console.log(this.field.width)
+		console.log(this.width,this.height,fieldwidth);
 	}
 	/*update(){
 		super.update()
@@ -764,8 +766,11 @@ function cansize(){
 	var candiv = document.getElementById("canvasdiv")
 	//var canwidth=Math.max(240,Math.min(parseFloat(getComputedStyle(candiv).width)*0.8,480))
 	//var canwidth=Math.min(parseFloat(getComputedStyle(candiv).width)*0.8,480)
+	//console.log(window.innerWidth,'innerwidth');
+	//console.log(getComputedStyle(candiv).width,'candiv')
+	//board.figures.forEach(figs=> figs.forEach(
 	var canwidth=parseFloat(getComputedStyle(candiv).width)*0.9
-	
+	//console.log(canwidth,'canwidth')
 	canvas.width=canwidth;
 	canvas.height=canwidth;
 	fieldwidth=canwidth/8;
