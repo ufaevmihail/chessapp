@@ -54,9 +54,27 @@ class Flipper{
 		container.classList.toggle("flipping");
 	}
 }
+var flag = false;
 export var flipper= new Flipper()
-function canvasevent(e){canevent=e}
+function canvasevent(e){if (e.type == 'touchstart') {
+	let r = canvas.getBoundingClientRect();
+	e.offsetX = e.touches[0].clientX - r.left;
+    e.offsetY = e.touches[0].clientY - r.top;
+	canevent=e
+	flag=true
+	setTimeout(()=>{flag=false},100)}
+	else if (e.type == 'mousedown' || e.type == 'mouseup')
+	{
+		if (!flag)
+			canevent=e
+	}
+	else
+		canevent=e
+	
+//if (canevent.type != 'mousemove') alert([canevent.type,canevent.offsetX,canevent.offsetY])
+}
 
+//var canvasevent = (e)=>{if (e.type == 'touchstart') {canvasevent = (e)=>{}; setTimeout(()=>canvasevent=canevent,40)};canvevent(e)}
 
 function arrayRemove(arr, value) { 
    return arr.filter(function(geeks){
@@ -130,7 +148,7 @@ class Sprite{
 				this.onmousedown.forEach(func=>func(e,this));
 				
 			}
-			if (e.type == "mouseup" || e.type=='touchend'){
+			if (e.type == "mouseup"){
 				this.onmouseup.forEach(func=>func(e,this));
 				
 			}
@@ -188,7 +206,7 @@ class Field extends Sprite{
 	onmouseover=[(e,spr)=>{if (spr.canMoveHere()) spr.fillcolor="green";}]
 	onmouseout =[(e,spr)=>{if (spr.fillcolor =="green")spr.fillcolor=null;}]
 	onmouseup = [/*(e,spr)=>{if (game.player.selectedfigure)game.player.selectedfigure.timeout=true},*/(e,spr)=>{adapter.actions[0](e,spr)}]
-	onmousedown=[(e,spr)=>{adapter.actions[1](e,spr)}]
+	onmousedown=[(e,spr)=>{adapter.actions[1](e,spr)}]//,(e,spr)=>{if (e.type=='touchstart')alert([e.type,spr.px,spr.py])}
 	behaviours = [(spr)=>{ctx.clearRect(spr.px*fieldwidth,spr.py*fieldwidth,fieldwidth,fieldwidth)}]
 	constructor(color,px,py){
 		super();
@@ -312,6 +330,7 @@ class Board{
 			game.player.selectedfigure.update();
 	}
 	handleEvent(e){
+		
 		this.fields.forEach(str=>str.forEach(el=>el.handleEvent(e)));
 		this.figures.forEach(str=>str.forEach(el=>el.handleEvent(e)));
 	}
@@ -329,8 +348,16 @@ class Board{
 
 
 class Figure extends Sprite{
-	onmousedown=[(e,spr)=>{if (connected && spr.player.selectedfigure == null && game.player.team==spr.team && game.turn%2==game.player.team) // && !spr.timeout
-	{spr.setSelected();spr.posx= e.offsetX-spr.width/3;spr.posy = e.offsetY-spr.width/3;spr.timeout=true}}]
+	onmousedown=[(e,spr)=>{if (connected && spr.player.selectedfigure == null && game.player.team==spr.team && game.turn%2==game.player.team && !spr.timeout) // && !spr.timeout
+	{spr.setSelected();spr.posx= e.offsetX-spr.width/3;spr.posy = e.offsetY-spr.width/3;spr.timeout=true}},
+	(e,spr)=>{if (adapter.currentSize == 'sm')
+			//alert([e.type,spr.px,spr.py])
+			//e.preventDefault()
+			e.stopPropagation();
+			//return false
+			//
+		;}
+		]
 	onmouseup=[(e,spr)=>{}]
 	onmousemove = [(e,spr)=>{if (spr.selected) {adapter.actions[3](e,spr)}}]  //spr.posx= e.offsetX-spr.width/3;spr.posy = e.offsetY-spr.width/3
 	behaviours=[(spr)=>{ctx.save()
@@ -359,7 +386,7 @@ class Figure extends Sprite{
 		this.selected = false;
 		this.cantogofields = [];
 		this.firstmove = true;
-		this.timeout=false;
+		//this.timeout=false;
 	}
 	setSelected(){
 		this.turnrule();
@@ -417,7 +444,7 @@ class Figure extends Sprite{
 		this.selected = false;
 		this.player.selectedfigure=null;
 		this.cantogofields.length = 0;
-		setTimeout(()=>this.timeout=false,10)
+		setTimeout(()=>this.timeout=false,30)
 		//this.timeout=false
 		//game.player.selectedfigure=null;
 	}
@@ -769,7 +796,11 @@ function cansize(){
 	//console.log(window.innerWidth,'innerwidth');
 	//console.log(getComputedStyle(candiv).width,'candiv')
 	//board.figures.forEach(figs=> figs.forEach(
-	var canwidth=parseFloat(getComputedStyle(candiv).width)*0.9
+	var canwidth;
+	if (adapter.currentSize!='sm')
+		canwidth = parseFloat(getComputedStyle(candiv).width)*0.9
+	else
+		canwidth = parseFloat(getComputedStyle(candiv).width)
 	//console.log(canwidth,'canwidth')
 	canvas.width=canwidth;
 	canvas.height=canwidth;
@@ -790,13 +821,15 @@ window.addEventListener("DOMContentLoaded", async () => {
 	await sleep(25);
 	moveaplier=true;
 })
-canvas.addEventListener("touchend", async function(event){
+/*canvas.addEventListener("touchend", async function(event){
 	canvasevent(event);
 	moveaplier=false;
 	await sleep(25);
 	moveaplier=true;
-})
-canvas.addEventListener('touchstart', canvasevent)	
+})*/
+//canvas.addEventListener("touchend", canvasevent);
+//canvas.addEventListener('touchstart',(e)=>{setTimeout(()=>canvasevent(e),10)});
+canvas.addEventListener('touchstart',canvasevent);	
 canvas.addEventListener("mousedown", canvasevent)
 canvas.addEventListener("mousemove", function(event){
 

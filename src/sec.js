@@ -5,7 +5,7 @@ export const backDomenWSS="wss://chess-server-app.herokuapp.com/ws/"
 //export const backDomen = "http://localhost:8000/"
 //export const backDomenWSS="ws://localhost:8000/ws/"
 export const frontDomen = "http://localhost:3000/"
-var csrftoken=Cookies.get('csrftoken');;
+var csrftoken=''//Cookies.get('csrftoken');;
 if (!csrftoken)
 	csrftoken='';
 var odin=0;
