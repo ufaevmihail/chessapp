@@ -24,10 +24,11 @@ canvas.addEventListener(e, function(event){
 	
 })}*/
 var moveaplier = true;
-var makeMoveFunc=(e,spr)=>{if (spr.canMoveHere()){game.player.selectedfigure.makeMove(spr);game.switchTurn();}
+var makeMoveFunc=(e,spr)=>{if (spr.canMoveHere()){game.player.selectedfigure.makeMove(spr);game.switchTurn()}
 	else{if (game.player.selectedfigure != null){game.player.selectedfigure.figReturn()}};game.player.selectedfigure=null;
 	if (spr.fillcolor =="green")spr.fillcolor=null;;}
-var adapter = new MultiSizer({'sm':[(e,spr)=>{},makeMoveFunc,(spr,e)=>spr.mousecollide(e.offsetX,e.offsetY),(e,spr)=>{}],'xl':[makeMoveFunc,(e,spr)=>{},(spr,e)=>false,(e,spr)=>{spr.posx= e.offsetX-spr.width/3;spr.posy = e.offsetY-spr.width/3}]})
+var adapter = new MultiSizer({'sm':[(e,spr)=>{},makeMoveFunc,(spr,e)=>spr.mousecollide(e.offsetX,e.offsetY),(e,spr)=>{},touchfunc],
+'xl':[makeMoveFunc,(e,spr)=>{},(spr,e)=>spr.mouseintersect,(e,spr)=>{spr.posx= e.offsetX-spr.width/3;spr.posy = e.offsetY-spr.width/3},(e)=>{canevent=e}]})
 class Flipper{
 	angle_in_rad = 0
 	angle_delta = Math.PI/1000*25
@@ -56,24 +57,47 @@ class Flipper{
 }
 var flag = false;
 export var flipper= new Flipper()
-function canvasevent(e){if (e.type == 'touchstart') {
+var canvasevent = (e) => adapter.actions[4](e)
+function touchfunc(e){
+	/*if (e.type == 'touchstart') {
+		let r = canvas.getBoundingClientRect();
+		//console.log(e.touches)
+		e.offsetX = e.targetTouches[0].clientX - r.left;
+		e.offsetY = e.targetTouches[0].clientY - r.top;
+		canevent=e
+	}*/
+	if (e.type == 'mousedown')
+		canevent=e
+}
+/*function canvasevent(e){if (e.type == 'touchstart') {
+	flag=true
 	let r = canvas.getBoundingClientRect();
 	e.offsetX = e.touches[0].clientX - r.left;
     e.offsetY = e.touches[0].clientY - r.top;
 	canevent=e
-	flag=true
-	setTimeout(()=>{flag=false},100)}
-	else if (e.type == 'mousedown' || e.type == 'mouseup')
+	//e.stopPropagation()
+	setTimeout(()=>{flag=false},500)}
+	else if (e.type == 'mousedown')
 	{
 		if (!flag)
 			canevent=e
 	}
+	else if (e.type == 'mouseup'){
+		if (!flag)
+		{
+			console.log('но почему')
+			canevent=e
+		}
+	}
 	else
+	{
+		console.log('но почему 2',e.type)
 		canevent=e
+	}
 	
 //if (canevent.type != 'mousemove') alert([canevent.type,canevent.offsetX,canevent.offsetY])
 }
-
+*/
 //var canvasevent = (e)=>{if (e.type == 'touchstart') {canvasevent = (e)=>{}; setTimeout(()=>canvasevent=canevent,40)};canvevent(e)}
 
 function arrayRemove(arr, value) { 
@@ -139,14 +163,12 @@ class Sprite{
 	posy;
 	mouseintersect=false;
 	fillcolor=null;
-	interfunc=(spr,e)=>{adapter.actions[2](spr,e)}
+	interfunc=(spr,e)=>{return adapter.actions[2](spr,e)}
 	handleEvent(e){
 		if (e.type == "mousemove") this.onmousemove.forEach(func=>func(e,this));
-		if (this.mouseintersect == true || this.interfunc(this,e)){
-			//console.log(e.type);
+		if (this.interfunc(this,e)){
 			if (e.type == "mousedown" || e.type=='touchstart'){
 				this.onmousedown.forEach(func=>func(e,this));
-				
 			}
 			if (e.type == "mouseup"){
 				this.onmouseup.forEach(func=>func(e,this));
