@@ -74,11 +74,11 @@ export const GameMain = () => {
 	  <Row>
 		<Col md="8">
 			<div id="canvasdiv" style={{width : "100%"}}>
-				<PlayerComp team={0}/>
+				<PlayerComp team={1}/>
 				<canvas className="myCanvas" id="myCanvas" >				
 				</canvas>
 				<div style={{display:'flex',justifyContent:'flex-end'}}>
-				<PlayerComp team={1}/>
+				<PlayerComp team={0}/>
 				</div>
 			</div>
 		</Col>
