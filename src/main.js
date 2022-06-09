@@ -556,7 +556,7 @@ class KingFigure extends Figure{
 				rook = r[1];
 		if (rook){
 		    rook.makeMove(board.fields[(this.px+field.px)/2][this.py],false,false)
-		    console.log("ya tut")
+		    //console.log("ya tut")
 		}
 	}
 }
@@ -679,7 +679,7 @@ function slonrule(){
 	slonn(this);
 };
 function peshkarule(){
-	var v = this.team==0 ? 1 : -1;
+	var v = this.team===1 ? 1 : -1;
 	v = board.flipped==1 ? v : -v;
 	var fields = board.fields;
 	if (inBoard(this.px,this.py+v)&& fields[this.px][this.py+v].figure == null){
@@ -936,7 +936,7 @@ canvas.addEventListener("mouseout", function(event){
 		canvasupdate()
 		window.addEventListener('resize',()=>{cansize();board.updateFigPos()});
         if (event.content=="ok"){			
-            if (id==0)
+            if (id!==0)
                 flipper.flip()
         }
 		connected = true;
