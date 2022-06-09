@@ -286,10 +286,10 @@ class Board{
 	kings=[null,null]
 	rooks = [[],[]];
 	sledpeshkifield;
-	figparams = [["roof",0,0,1],["konb",1,0,1],["slon",2,0,1],["king",3,0,1],["ferz",4,0,1],["slon",5,0,1],["konb",6,0,1],["roof",7,0,1],
+	figparams = [["roof",0,0,1],["konb",1,0,1],["slon",2,0,1],["king",4,0,1],["ferz",3,0,1],["slon",5,0,1],["konb",6,0,1],["roof",7,0,1],
 	["peshka",0,1,1],["peshka",1,1,1],["peshka",2,1,1],["peshka",3,1,1],["peshka",4,1,1],["peshka",5,1,1],["peshka",6,1,1],
 	["peshka",7,1,1],
-	["roof",0,7,0],["konb",1,7,0],["slon",2,7,0],["king",3,7,0],["ferz",4,7,0],["slon",5,7,0],["konb",6,7,0],["roof",7,7,0],
+	["roof",0,7,0],["konb",1,7,0],["slon",2,7,0],["king",4,7,0],["ferz",3,7,0],["slon",5,7,0],["konb",6,7,0],["roof",7,7,0],
 	["peshka",0,6,0],["peshka",1,6,0],["peshka",2,6,0],["peshka",3,6,0],["peshka",4,6,0],["peshka",5,6,0],["peshka",6,6,0],
 	["peshka",7,6,0]]
 	/*figparams = [["roof",0,0,0],["konb",1,0,0],["slon",2,0,0],["king",3,0,0],["ferz",4,0,0],["slon",5,0,0],["konb",6,0,0],["roof",7,0,0],
@@ -309,7 +309,7 @@ class Board{
 		var color = ["white","saddlebrown"];
 		for (let i=0; i<8;i++){
 			for (let j=0; j<8;j++){
-				s.push(new Field(color[(i+j+1)%2],i,j))
+				s.push(new Field(color[(i+j)%2],i,j))
 			}
 			this.fields.push(s);
 			s=[]
