@@ -6,8 +6,10 @@ var chatBoard;
 var canvas;
 var ctx;           
 var images = {};
+var audios = {};
 var image_names = ["wferz.png","wkonb.png","wroof.png","wslon.png","wking.png","wpeshka.png",
 "bferz.png","bkonb.png","broof.png","bslon.png","bking.png","bpeshka.png",'strelkab.png','strelkas.png'];
+var audio_names = ['shelchok.mp3'];
 var canevent = null;
 var fieldwidth = 40;
 var id;
@@ -134,7 +136,20 @@ function Surface(ctx,makebackgroundfunc,posx=0,posy=0){
 		this.context.restore();
 	};
 };
-
+function loadAudio(name){
+	return new Promise((resolve, reject) => {
+        var aud = new Audio();
+        aud.onload = () => {
+            resolve(aud);
+        }
+        aud.onerror = (err) => {
+            reject(err)
+			//console.log(img.src)
+        }
+        aud.src = 'audio/' +name;
+ 
+    })
+}
 function loadImage(name){
     return new Promise((resolve, reject) => {
         var img = new Image();
@@ -455,6 +470,7 @@ class Figure extends Sprite{
 		this.timeout=false;
 		this.cantogofields.length = 0;
 		//console.log(this.field);
+		audios['shelchok'].play()
 		if (send){
 		    websocket.send(JSON.stringify({type:'move',startfield:[isFlipped(predpx),isFlipped(predpy)],
 		    endfield:[isFlipped(this.px),isFlipped(this.py)],
@@ -882,6 +898,8 @@ canvas.addEventListener("mouseout", function(event){
         // тут мы работаем с загружеными картинками
 		
         images = Object.fromEntries(imageEntries);
+		audios['shelchok']= new Audio('audio/shelchok.mp3')
+		console.log(audios)
 		/*while (!connected){
 			console.log(connected)
 			if (connected){
