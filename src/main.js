@@ -899,7 +899,7 @@ canvas.addEventListener("mouseout", function(event){
 		
         images = Object.fromEntries(imageEntries);
 		audios['shelchok']= new Audio('audio/shelchok.mp3')
-		console.log(audios)
+		audios['shelchok'].volume = 0.4;
 		/*while (!connected){
 			console.log(connected)
 			if (connected){
