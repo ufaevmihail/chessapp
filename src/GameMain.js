@@ -53,10 +53,10 @@ class ChessTimer{
 				alert(`${t} победили по времени`)
 			}
 			if (require('./main.js').game.endGame){
+				console.log('ffff')
 				this.stopTicking(team)
 				this.stopTicking((team+1)%2)
-			}
-				
+			}				
 		}
 	}
 }

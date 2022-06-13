@@ -640,12 +640,12 @@ class Game{
 		
 		if (draw && !matt){
 			setTimeout(()=>alert('draw'),100)
-			this.endgame=true
+			this.endGame=true
 		}
 		if (matt){
 			var k = this.turn % 2 ? 'черн' : 'бел'
 			setTimeout(()=>alert(`${k}ые выиграли`),100)
-			this.endgame=true
+			this.endGame=true
 		}
 	}
 }
