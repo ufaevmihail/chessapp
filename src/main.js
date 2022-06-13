@@ -586,6 +586,7 @@ class Game{
 	turnrules = {ferz: ferzrule,king: korolrule,konb: konbrule,roof: roofrule,slon: slonrule, peshka:peshkarule}
 	turn = 0
 	curplayerkingfield;
+	endGame=false
 	constructor(){
 		this.player = this.players[0]
 		this.curplayerkingfield = null
@@ -637,11 +638,14 @@ class Game{
 			}
 		}
 		
-		if (draw && !matt)
+		if (draw && !matt){
 			setTimeout(()=>alert('draw'),100)
+			this.endgame=true
+		}
 		if (matt){
 			var k = this.turn % 2 ? 'черн' : 'бел'
 			setTimeout(()=>alert(`${k}ые выиграли`),100)
+			this.endgame=true
 		}
 	}
 }
