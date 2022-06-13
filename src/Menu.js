@@ -1,6 +1,6 @@
 import {Dispatcher} from './myTools.js'
-import React,{Component} from 'react';
-import { Button,Toast } from 'react-bootstrap';
+import React,{Component,useState} from 'react';
+import { Button,Toast,Offcanvas } from 'react-bootstrap';
 import {userInfoView, UserPanel,ErrorButton} from './myComps.js'
 import {JWTRequiredRequest,UserInfoView,backDomenWSS} from './sec.js'
 
@@ -20,6 +20,7 @@ dispatcher.registerComp('userView',userInfoView)
 dispatcher.createEvent('login','logout')
 //dispatcher.subscribeEvent('logout',()=>console.log('ya razloginilsya'))
 //window.addEventListener('mousedown',()=>{userInfoView.logout()})
+
 class HostGameButton extends ErrorButton{
 	errors=[['вы не авторизованы',()=>userInfoView.isAnonim()]]
 	constructor(props){
@@ -44,14 +45,82 @@ class HostGameButton extends ErrorButton{
 	disabled(){
 		return this.noErrors
 	}
+	options(){
+		return {}
+	}
 	onClick(){
 		this.hostRequest = new JWTRequiredRequest(userInfoView)
-		this.hostRequest.sendReq('create_game/free/',{}).then((data)=>{window.location='http://'+document.location.host+'/livegame/'+data.game_id})		
+		this.hostRequest.sendReq('create_game/free/',this.options()).then((data)=>{window.location='http://'+document.location.host+'/livegame/'+data.game_id})		
 	}
 	getValue(){
-		return 'Создать игру'
+		return 'Неограничено'
 	}
 }
+class TridvaButton extends HostGameButton{
+	options(){
+		var formData = new FormData()
+		formData.append('time1base', '180');
+		formData.append('time1add', '2');
+		formData.append('time2base', '180');
+		formData.append('time2add', '2');
+		return {
+			method:'POST',
+			body: formData
+		}
+	}
+	getValue(){
+		return ' 3+2 '
+	}
+}
+class TriNolButton extends HostGameButton{
+	options(){
+		var formData = new FormData()
+		formData.append('time1base', '180');
+		formData.append('time1add', '0');
+		formData.append('time2base', '180');
+		formData.append('time2add', '0');
+		return {
+			method:'POST',
+			body: formData
+		}
+	}
+	getValue(){
+		return ' 3+0 '
+	}
+}
+class PyatDvaButton extends HostGameButton{
+	options(){
+		var formData = new FormData()
+		formData.append('time1base', '300');
+		formData.append('time1add', '2');
+		formData.append('time2base', '300');
+		formData.append('time2add', '2');
+		return {
+			method:'POST',
+			body: formData
+		}
+	}
+	getValue(){
+		return ' 5+2 '
+	}
+}
+class PyatnadcatDvaButton extends HostGameButton{
+	options(){
+		var formData = new FormData()
+		formData.append('time1base', '900');
+		formData.append('time1add', '2');
+		formData.append('time2base', '900');
+		formData.append('time2add', '2');
+		return {
+			method:'POST',
+			body: formData
+		}
+	}
+	getValue(){
+		return ' 15+2 '
+	}
+}
+
 class GamesListComp extends Component{
 	constructor(props){
 		super(props)
@@ -89,9 +158,53 @@ class GamesListComp extends Component{
 		</Toast>)
 	}
 }
+/*var test1;
+const ButtonTest=()=>{
+	var show=false
+	return <Button variant="primary" onClick={()=>{test1(!show);show=!show}}>
+        Launch
+      </Button>
+}*/
+var test1;
+class HostGameMenuButton extends HostGameButton{
+	onClick(){
+		test1()
+	}
+	getValue(){
+		return 'Создать игру'
+	}
+}
+function OffCanvas() {
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+  test1 = handleShow
+  return (
+    <>
+		<HostGameMenuButton/>
+		
+      <Offcanvas show={show} onHide={handleClose}>
+        <Offcanvas.Header closeButton>
+          <Offcanvas.Title>Создать игру</Offcanvas.Title>
+        </Offcanvas.Header>
+        <Offcanvas.Body>
+          <HostGameButton/>
+		  <TriNolButton/>
+		  <TridvaButton/>
+		  <PyatDvaButton/>
+		  <PyatnadcatDvaButton/>
+        </Offcanvas.Body>
+      </Offcanvas>
+    </>
+  );
+}
+/*<Button variant="primary" onClick={handleShow}>
+        Launch
+      </Button>*/
 export const MainMenu=()=>{
 	return (<div>
-	<HostGameButton/>
+	<OffCanvas/>
+	
 	<UserPanel/>
 	<GamesListComp type='free'/>
 	</div>)

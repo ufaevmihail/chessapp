@@ -1,4 +1,4 @@
-import React,{Component} from 'react';
+import React,{Component,useState,useEffect} from 'react';
 import { useParams,Navigate } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Button,Form,Row,Col,Toast,Container,Collapse } from 'react-bootstrap';
@@ -13,7 +13,86 @@ var chatBoard;
 export var ffff=f()*/
 //export var websocket = new WebSocket("wss://chessproject1.herokuapp.com/");
 //require('./main.js');
+//var chessTimer;
 var flipperObj;
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+class ChessTimer{
+	chessCompChangers=[null,null]
+	timers={0:null,1:null}
+	running=[false,false]
+	addCounts=[0,0]
+	constructor(time1=null,time2=null){
+		this.timers[0]=time1
+		this.timers[1]=time2
+	}
+	stopTicking(team){
+		this.running[team]=false
+	}
+	startTickinggg(team){
+		this.addCounts[team]+= 1
+		this.running[team] = true
+		this.ticking(team)
+	}
+	startTicking(team){
+		this.stopTicking((team+1)%2)
+		if (this.timers[team]){
+			this.timers[(team+1)%2].base += this.timers[(team+1)%2].add
+			this.startTickinggg(team)
+		}
+	}
+	async ticking(team){
+		while (this.running[team]){
+			await sleep(100)
+			this.timers[team]['base']-=0.1
+			if (this.timers[team]['base'] <= 0){
+				var t = (team+1)%2 == 0 ? 'белые' : 'черные'
+				require('./main.js').connect(false)
+				this.stopTicking(team)
+				alert(`${t} победили по времени`)
+			}
+		}
+	}
+}
+
+export var chessTimer;
+/*const TimerComp = ({team})=>{
+	const [timeLeft,timeChanger] = useState(chessTimer.timers[team]?.base)
+	//baseTime = Date.now()
+	//chessTimer.chessCompChangers[team]=timeChanger
+	var show;
+	useEffect(()=>{
+		//if (chessTimer.timers[team])
+			setInterval(()=>{timeChanger(chessTimer.timers[team]?.base)
+			show = chessTimer.timers[team] ? true : false
+		},1000)			
+	},[])
+	if (chessTimer.timers[team])
+		return (<Collapse in={show}><h1> {Math.round(timeLeft)} </h1> </Collapse>)
+	else
+		return null
+}*/
+const TimerComp = ({team})=>{
+	//var startTime = chessTimer.timers[team]?.base ? chessTimer.timers[team]?.base : 120
+	const [timeLeft,timeChanger] = useState(chessTimer.timers[team]?.base)
+	//baseTime = Date.now()
+	//chessTimer.chessCompChangers[team]=timeChanger
+	//var show=isNaN(Math.round(timeLeft)) ? true : false;
+	useEffect(()=>{
+		//if (chessTimer.timers[team])
+			setInterval(()=>{timeChanger(chessTimer.timers[team]?.base)
+			//show = chessTimer.timers[team] ? true : false
+			//show = isNaN(Math.round(timeLeft)) ? true : false
+		},1000)			
+	},[])
+	return (<Collapse in={!isNaN(Math.round(timeLeft))}>
+		<div>
+			<h1> {Math.round(timeLeft)}</h1>
+		</div>
+	</Collapse>)
+}
+//setInterval(()=>console.log(chessTimer.timers[0],' у белого', chessTimer.timers[1],' у черного'),1000)
 export function on_ws_message(event){
 	if (event.type=='chat_mess'){
 		chatBoard.addMessage({id:event.usersender.account.user, sender: event.usersender, msg: event.content})
@@ -25,6 +104,12 @@ export function on_ws_message(event){
 			if (0 in event.data && 1 in event.data)
 				require('./main.js').connect();
 		}
+	}
+	if (event.type=='timers'){
+		console.log(event.data)
+		chessTimer.timers=event.data.timers
+		if (event.data.turn !== 0 && !chessTimer.running[event.data.turn%2] && require('./main.js').connected && require('./main.js').game.turn !== 1)
+			chessTimer.startTickinggg(event.data.turn%2)
 	}
 }
 var firstff = true
@@ -64,7 +149,8 @@ export const GameMain = () => {
 	//console.log(params);
 	//websocket = new WebSocket("wss://chessproject1.herokuapp.com/");
 	websocket=ws(params.id)
-	
+	chessTimer =new ChessTimer()
+	//chessTimer =new ChessTimer({'base':100,'add':5},{'base':100,'add':5})
 	//websocket = new WebSocket("ws://localhost:8000/ws/livegame/"+params.id)
 	req=re()
 	//websocket.ffff=2;
@@ -314,7 +400,8 @@ class PlayerComp extends Component{
 						<strong className="me-auto">{this.payload.username}</strong>
 					</Toast.Header>
 					<Toast.Body>
-						<p>rating : {this.payload.account.rating}</p>						
+						<p>rating : {this.payload.account.rating}</p>
+						<TimerComp team={this.team}/>
 					</Toast.Body>
 				</Toast>
 			</div>

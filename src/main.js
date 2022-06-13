@@ -1,6 +1,7 @@
 //var websocket = require('./GameMain.js').websocket
 import {MultiSizer} from './myTools.js'
 import Cookies from 'js-cookie';
+var chessTimer = require('./GameMain.js').chessTimer
 var websocket=require('./GameMain.js').ws()
 var chatBoard;
 var canvas;
@@ -14,10 +15,10 @@ var canevent = null;
 var fieldwidth = 40;
 var id;
 var board;
-var game;
-var connected=false;
-export function connect(){
-	connected=true
+export var game;
+export var connected=false;
+export function connect(con=true){
+	connected=con
 }
 /*for (let e of ["mousemove","mousedown","mouseup"]){
 canvas.addEventListener(e, function(event){
@@ -136,20 +137,8 @@ function Surface(ctx,makebackgroundfunc,posx=0,posy=0){
 		this.context.restore();
 	};
 };
-function loadAudio(name){
-	return new Promise((resolve, reject) => {
-        var aud = new Audio();
-        aud.onload = () => {
-            resolve(aud);
-        }
-        aud.onerror = (err) => {
-            reject(err)
-			//console.log(img.src)
-        }
-        aud.src = 'audio/' +name;
- 
-    })
-}
+
+
 function loadImage(name){
     return new Promise((resolve, reject) => {
         var img = new Image();
@@ -470,6 +459,8 @@ class Figure extends Sprite{
 		this.timeout=false;
 		this.cantogofields.length = 0;
 		//console.log(this.field);
+		if (game.turn !== 0)
+			chessTimer.startTicking((this.team+1)%2)
 		audios['shelchok'].play()
 		if (send){
 		    websocket.send(JSON.stringify({type:'move',startfield:[isFlipped(predpx),isFlipped(predpy)],
@@ -863,6 +854,9 @@ window.addEventListener("DOMContentLoaded", async () => {
 	moveaplier=false;
 	await sleep(25);
 	moveaplier=true;
+})
+window.addEventListener("focus",()=>{
+	websocket.send(JSON.stringify({'type':'timers'}))
 })
 /*canvas.addEventListener("touchend", async function(event){
 	canvasevent(event);
