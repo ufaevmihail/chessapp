@@ -79,11 +79,7 @@ export var chessTimer;
 		return null
 }*/
 const TimerComp = ({team})=>{
-	//var startTime = chessTimer.timers[team]?.base ? chessTimer.timers[team]?.base : 120
-	const [timeLeft,timeChanger] = useState(chessTimer.timers[team]?.base)
-	//baseTime = Date.now()
-	//chessTimer.chessCompChangers[team]=timeChanger
-	//var show=isNaN(Math.round(timeLeft)) ? true : false;
+	const [timeLeft,timeChanger] = useState(chessTimer.timers[team]?.base)	
 	useEffect(()=>{
 		//if (chessTimer.timers[team])
 			setInterval(()=>{timeChanger(chessTimer.timers[team]?.base)
@@ -91,9 +87,10 @@ const TimerComp = ({team})=>{
 			//show = isNaN(Math.round(timeLeft)) ? true : false
 		},1000)			
 	},[])
+	
 	return (<Collapse in={!isNaN(Math.round(timeLeft))}>
 		<div>
-			<h1> {Math.round(timeLeft)}</h1>
+			<h1> {parseInt(timeLeft/60)+' : ' + parseInt(timeLeft % 60)}</h1>
 		</div>
 	</Collapse>)
 }
@@ -167,9 +164,7 @@ export const GameMain = () => {
 				<PlayerComp team={1}/>
 				<canvas className="myCanvas" id="myCanvas" >				
 				</canvas>
-				<div style={{display:'flex',justifyContent:'flex-end'}}>
 				<PlayerComp team={0}/>
-				</div>
 			</div>
 		</Col>
 		<Col md="4">
@@ -396,18 +391,20 @@ class PlayerComp extends Component{
 	render(){
 		//console.log(flipperObj.flipped)
 		//var t=this.team ? 'черные' : 'белые'
+		var f = this.team==0 ? '-reverse' : ''
 		var t;
 		if (this.payload){
-			t=<div>
+			t=<div style={{display:'flex',justifyContent:'space-between',flexDirection: 'row'+f, alignItems:'center'}}>
 				<Toast className='border-0' style={{width:'200px', backgroundColor:'rgba(255, 222, 173,.5)'}} >
 					<Toast.Header closeButton={false}>
 						<strong className="me-auto">{this.payload.username}</strong>
 					</Toast.Header>
 					<Toast.Body>
 						<p>rating : {this.payload.account.rating}</p>
-						<TimerComp team={this.team}/>
+						
 					</Toast.Body>
 				</Toast>
+				<TimerComp team={this.team}/>
 			</div>
 		}
 		else
