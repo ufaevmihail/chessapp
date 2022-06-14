@@ -150,7 +150,7 @@ export const GameMain = () => {
 	//console.log(params);
 	//websocket = new WebSocket("wss://chessproject1.herokuapp.com/");
 	websocket=ws(params.id)
-	chessTimer =new ChessTimer()
+	chessTimer = new ChessTimer()
 	//chessTimer =new ChessTimer({'base':100,'add':5},{'base':100,'add':5})
 	//websocket = new WebSocket("ws://localhost:8000/ws/livegame/"+params.id)
 	req=re()
@@ -162,7 +162,7 @@ export const GameMain = () => {
 		<Col md="8">
 			<div id="canvasdiv" style={{width : "100%"}}>
 				<PlayerComp team={1}/>
-				<canvas className="myCanvas" id="myCanvas" >				
+				<canvas className="myCanvas" id="myCanvas" style={{margin: require('./main.js').adapter.currentSize != 'sm' ? '0 5% 0 5%' : '0'}} >				
 				</canvas>
 				<PlayerComp team={0}/>
 			</div>

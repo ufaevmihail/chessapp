@@ -30,7 +30,7 @@ var moveaplier = true;
 var makeMoveFunc=(e,spr)=>{if (spr.canMoveHere()){game.player.selectedfigure.makeMove(spr);game.switchTurn()}
 	else{if (game.player.selectedfigure != null){game.player.selectedfigure.figReturn()}};game.player.selectedfigure=null;
 	if (spr.fillcolor =="green")spr.fillcolor=null;;}
-var adapter = new MultiSizer({'sm':[(e,spr)=>{},makeMoveFunc,(spr,e)=>spr.mousecollide(e.offsetX,e.offsetY),(e,spr)=>{},touchfunc],
+export var adapter = new MultiSizer({'sm':[(e,spr)=>{},makeMoveFunc,(spr,e)=>spr.mousecollide(e.offsetX,e.offsetY),(e,spr)=>{},touchfunc],
 'xl':[makeMoveFunc,(e,spr)=>{},(spr,e)=>spr.mouseintersect,(e,spr)=>{spr.posx= e.offsetX-spr.width/3;spr.posy = e.offsetY-spr.width/3},(e)=>{canevent=e}]})
 class Flipper{
 	angle_in_rad = 0
