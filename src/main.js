@@ -114,7 +114,10 @@ function removeItemOnce(arr, value) {
   if (index > -1) {
     arr.splice(index, 1);
   }
-  return arr;
+  if (arr.includes(value))
+	return removeItemOnce(arr,value)
+  else
+	return arr;
 }
 function isFlipped(x){
     x = board.flipped==1 ? x : 7-x
