@@ -664,7 +664,8 @@ function korolrule(){
 					this.cantogofields.push(field);
 			}
 		}
-	rokerate(this);
+	if (this.team == game.turn %2)
+		rokerate(this);
 };
 function konbrule(){
 	var k=[-1,-2,1,2]
@@ -768,6 +769,7 @@ function rooff(obj){
 	}	
 }
 function rokerate(king){
+	//console.log('я '+king.team+ ' пытаюсь рокероваться')
 	if (king.firstmove && board.kings[(king.team+1)%2].rokerate)
 		for (var rook of board.rooks[king.team])
 			if (rook.firstmove)
