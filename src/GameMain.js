@@ -78,6 +78,12 @@ export var chessTimer;
 	else
 		return null
 }*/
+function addNol(chislo){
+	if (chislo>=0 && chislo <10)
+		return '0'+chislo
+	else
+		return ''+chislo
+}
 const TimerComp = ({team})=>{
 	const [timeLeft,timeChanger] = useState(chessTimer.timers[team]?.base)	
 	useEffect(()=>{
@@ -90,7 +96,7 @@ const TimerComp = ({team})=>{
 	
 	return (<Collapse in={!isNaN(Math.round(timeLeft))}>
 		<div>
-			<h1> {parseInt(timeLeft/60)+' : ' + parseInt(timeLeft % 60)}</h1>
+			<h1> {addNol(parseInt(timeLeft/60))+' : ' + addNol(parseInt(timeLeft % 60))}</h1>
 		</div>
 	</Collapse>)
 }
