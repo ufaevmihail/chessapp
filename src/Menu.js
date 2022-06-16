@@ -26,17 +26,17 @@ class HostGameButton extends ErrorButton{
 	constructor(props){
 		super(props)
 		this.hostReq()
-		this.update()
+		
 		dispatcher.registerComp('hostButton',this)
 		dispatcher.subscribeEvent('logout',this.update,this)
 		dispatcher.subscribeEvent('login',this.update,this)
 	}
 	componentDidMount(){
-		
+		this.update()
 		//comp.setState({'games':event})
 	}
 	hostReq(){
-		this.hostRequest = new JWTRequiredRequest(userInfoView)
+		//this.hostRequest = new JWTRequiredRequest(userInfoView)
 		/*this.hostRequest.onAplied=function(data){
 			//setTimeout(()=>window.location='http://localhost:3000/livegame/'+data.game_id,400)
 			window.location='http://localhost:3000/livegame/'+data.game_id
@@ -181,7 +181,7 @@ function OffCanvas() {
   test1 = handleShow
   return (
     <>
-		<HostGameMenuButton/>
+	  <HostGameMenuButton/>
 		
       <Offcanvas show={show} onHide={handleClose}>
         <Offcanvas.Header closeButton>
@@ -204,6 +204,7 @@ function OffCanvas() {
 export const MainMenu=()=>{
 	return (<div>
 	<OffCanvas/>
+	
 	
 	<UserPanel/>
 	<GamesListComp type='free'/>
