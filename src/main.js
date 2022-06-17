@@ -821,8 +821,8 @@ async function canvasupdate(){
 	while (true) {if(canevent != null)//sprit.handleEvent(canevent)};
 	//sprit.update();
 	{board.handleEvent(canevent);}
-	board.redraw();
 	canevent = null;
+	board.redraw();	
 	await sleep(25);}
 	}
 
