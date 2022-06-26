@@ -462,6 +462,7 @@ class Figure extends Sprite{
 		this.timeout=false;
 		this.cantogofields.length = 0;
 		//console.log(this.field);
+		setTimeout(()=>websocket.send(JSON.stringify({'type':'timers'})),200)
 		if (game.turn !== 0)
 			chessTimer.startTicking((this.team+1)%2)
 		audios['shelchok'].play()

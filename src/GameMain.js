@@ -114,6 +114,7 @@ export function on_ws_message(event){
 		}
 	}
 	if (event.type=='timers'){
+		//console.log('пришло время')
 		chessTimer.timers=event.data.timers
 		if (event.data.turn !== 0 && !chessTimer.running[event.data.turn%2] && require('./main.js').connected && require('./main.js').game.turn !== 1 && !require('./main.js').game.endGame)
 			chessTimer.startTickinggg(event.data.turn%2)
